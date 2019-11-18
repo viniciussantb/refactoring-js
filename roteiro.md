@@ -202,7 +202,7 @@ test();
 
 **COMMIT.**
 
-## Refactoring 1: *Extract Method*
+## Refactoring #1: *Extract Method*
 Podemos ver que o método `Customer.statement` é um dos maiores e mais confusos trechos do código. É uma função que realiza muitas tarefas, faz o uso de muitas variáveis locais e abusa da programação procedural. Para resolver essa bagunça, podemos começar extraindo um método para diminuir o tamanho de `statement` menor. Esse novo método poderá ser chamado de `amountFor`, e será responsável pelo cálculo da quantia dos filmes alugados por um cliente, demarcado pelo comentário `Determine amounts for each line`. Após a extração do método, o código de `statement` será:
 
 ##### Code block 2
@@ -238,7 +238,7 @@ statement() {
 }
 ```
 
-### Exercício: *Extract Method*
+#### Exercício: *Extract Method*
 Extraia o código demarcado pelo comentário `Determine amounts for each line` para um novo método, para que `statement` fique menor e mais legível ([code block 2](#code-block-2)). Não se esqueça de executar o teste após o refactoring!
 
 <details>
@@ -282,3 +282,133 @@ class Customer {
 
 **COMMIT.**
 
+## Refactoring #2: *Move Method*
+Nesse momento, fica claro que o recém criado método `Customer.amountFor` trata de regras específicas da classe `Rental`. Podemos torná-lo mais coerente movendo-o para a classe `Rental`, já que seu único parâmetro é um objeto `Rental` e usa seus dados para retornar uma nova informação. Esse tipo de refactoring é chamado [`move method`](https://refactoring.guru/move-method), e é utilizado quando desejamos reduzir a interdependência entre classes.
+
+Inicialmente, mova esse método para `Rental`, mas com o nome `getCharge`; a versão antiga vai ser alterada para apenas delegar a chamada para o método movido. A ideia é que refactorings devem ser feitos em pequenos passos, para garantir que nada está sendo quebrado.
+
+```js
+class Rental {
+    ...
+    /**
+     * @return {number}
+     */
+    getCharge() { // note que não precisa mais de parâmetro!
+        let amount = 0;
+
+        switch (this.movie.priceCode) {
+            case Movie.REGULAR:
+                amount += 2;
+                if (this.daysRented > 2) {
+                    amount += (this.daysRented - 2) * 1.5;
+                }
+                break;
+            case Movie.NEW_RELEASE:
+                amount += this.daysRented * 3;
+                break;
+            case Movie.CHILDREN:
+                    amount += 1.5;
+                if (this.daysRented > 3) {
+                    amount += (this.daysRented - 3) * 1.5;
+                }
+                break;
+        }
+
+        return amount;
+    }
+    ...
+}
+
+class Customer {
+    ...
+    amountFor(rental) {
+        return rental.getCharge(); // agora apenas delega chamada para método movido
+    }
+    ...
+}
+```
+Ao executar os testes e verificar que tudo está funcionando corretamente, o método pode ser removido de `Customer`. Após isso, ainda há um trecho de `Customer.statement` que chama `Customer.amountFor`:
+
+```js
+let thisAmount = this.amountFor(rental);
+```
+Faça-o chamar o novo método de `Rental` e tudo pronto:
+```js
+let thisAmount = rental.getCharge();
+```
+
+#### Exercício: *Move Method*
+Mova `Customer.amountFor` para a classe `Rental` com as devidas modificações. Não se esqueça de executar o teste após o refactoring!
+
+<details>
+<summary>Código-fonte: Move Method</summary>
+
+```js
+class Rental {
+    ...
+    /**
+     * @return {number}
+     */
+    getCharge() { // note que não precisa mais de parâmetro!
+        let amount = 0;
+
+        switch (this.movie.priceCode) {
+            case Movie.REGULAR:
+                amount += 2;
+                if (this.daysRented > 2) {
+                    amount += (this.daysRented - 2) * 1.5;
+                }
+                break;
+            case Movie.NEW_RELEASE:
+                amount += this.daysRented * 3;
+                break;
+            case Movie.CHILDREN:
+                    amount += 1.5;
+                if (this.daysRented > 3) {
+                    amount += (this.daysRented - 3) * 1.5;
+                }
+                break;
+        }
+
+        return amount;
+    }
+    ...
+}
+
+class Customer {
+    ...
+    /**
+     * @method statement
+     * @return {string}
+     */
+    statement() {
+        let totalAmount = 0;
+        let frequentRenterPoints = 0;
+
+        let result = `Rental Record for ${this.name}\n`;
+
+        for (let rental of this.rentals) {
+            let thisAmount = rental.getCharge(); // <-- método movido para outra classe
+
+            frequentRenterPoints++;
+
+            // add bonus for a two day new release rental
+            if (rental.movie.priceCode === Movie.NEW_RELEASE && rental.daysRented > 1) {
+                frequentRenterPoints++;
+            }
+
+            //show figures for this rental
+            result += `\t${rental.movie.title}\t${thisAmount}\n`;
+            totalAmount += thisAmount;
+        }
+
+        //add footer lines
+        result += `Amount owed is ${totalAmount}\nYou earned ${frequentRenterPoints} frequent renter points`;
+        return result;
+    }
+    ...
+}
+```
+</details>
+
+**COMMIT.**

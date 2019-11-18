@@ -3,7 +3,7 @@ Exercício prático sobre refatoração em JavaScript baseado no exemplo do livr
 
 ### Instruções
 * Clone este repositório do GitHub em seu computador.
-* Acesse o arquivo `roteiro.md` e siga as seções.
+* Acesse o arquivo [`roteiro.md`](roteiro.md) e siga as seções.
 * O código do exercício deverá ser desenvolvido na pasta `src`, onde já se encontra um arquivo `index.js` vazio. Cada seção do roteiro contém um refactoring a ser realizado na versão inicial do código.
 * A cada refactoring no código, um *commit* deverá ser feito para manter o controle de todas as mudanças.
 
