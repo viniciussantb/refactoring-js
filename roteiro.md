@@ -3,6 +3,7 @@ O exercício abaixo destaca uma série de refatorações em um sistema pré-exis
 
 ## Versão inicial
 O código inicial do código do sistema encontra-se abaixo. Leia, analise e trascreva para o arquivo `src/index.js` (não copie e cole, pois o ato de escrever o código melhora o seu entendimento).
+##### Code block 1
 ```js
 class Movie {
     /**
@@ -110,6 +111,7 @@ class Customer {
         for (let rental of this.rentals) {
             let thisAmount = 0;
 
+            // Determine amounts for each line
             switch (rental.movie.priceCode) {
                 case Movie.REGULAR:
                     thisAmount += 2;
@@ -153,8 +155,11 @@ Tendo todo o conteúdo no arquivo `index.js`, realize um **commit** para salvar 
 
 Será necessário criar o hábito de executar esse teste logo após cada refatorção deste roteiro, preferencialmente antes de fazer um *commit*, para nos certificarmos que as funcionalidades do sistema ainda estão funcionando mesmo com mudanças no código. Caso em algum momento o teste aponte uma falha, a refatoração não foi feita corretamente.
 
+### Exercício: Teste unitário
+Escreva um teste unitário para o método `Customer.statement`.
+
 <details>
-<summary>Código-fonte: Teste unitário (clique para exibir)</summary>
+<summary>Código-fonte: Teste unitário</summary>
   
 ```js
 function test() {
@@ -195,6 +200,85 @@ test();
 ```
 </details>
 
+**COMMIT.**
 
+## Refactoring 1: *Extract Method*
+Podemos ver que o método `Customer.statement` é um dos maiores e mais confusos trechos do código. É uma função que realiza muitas tarefas, faz o uso de muitas variáveis locais e abusa da programação procedural. Para resolver essa bagunça, podemos começar extraindo um método para diminuir o tamanho de `statement` menor. Esse novo método poderá ser chamado de `amountFor`, e será responsável pelo cálculo da quantia dos filmes alugados por um cliente, demarcado pelo comentário `Determine amounts for each line`. Após a extração do método, o código de `statement` será:
 
+##### Code block 2
+```js
+/**
+ * @method statement
+ * @return {string}
+ */
+statement() {
+    let totalAmount = 0;
+    let frequentRenterPoints = 0;
+
+    let result = `Rental Record for ${this.name}\n`;
+
+    for (let rental of this.rentals) {
+        let thisAmount = this.amountFor(rental); // <-- novo método!
+
+        frequentRenterPoints++;
+
+        // add bonus for a two day new release rental
+        if (rental.movie.priceCode === Movie.NEW_RELEASE && rental.daysRented > 1) {
+            frequentRenterPoints++;
+        }
+
+        //show figures for this rental
+        result += `\t${rental.movie.title}\t${thisAmount}\n`;
+        totalAmount += thisAmount;
+    }
+
+    //add footer lines
+    result += `Amount owed is ${totalAmount}\nYou earned ${frequentRenterPoints} frequent renter points`;
+    return result;
+}
+```
+
+### Exercício: *Extract Method*
+Extraia o código demarcado pelo comentário `Determine amounts for each line` para um novo método, para que `statement` fique menor e mais legível ([code block 2](#code-block-2)). Não se esqueça de executar o teste após o refactoring!
+
+<details>
+<summary>Código-fonte: Extract Method</summary>
+  
+```js
+class Customer {
+    ...
+
+    /**
+     * @param {Rental} rental
+     * @return {number}
+     */
+    amountFor(rental) {
+        let amount = 0;
+
+        switch (rental.movie.priceCode) {
+            case Movie.REGULAR:
+                amount += 2;
+                if (rental.daysRented > 2) {
+                    amount += (rental.daysRented() - 2) * 1.5;
+                }
+                break;
+            case Movie.NEW_RELEASE:
+                amount += rental.daysRented * 3;
+                break;
+            case Movie.CHILDREN:
+                    amount += 1.5;
+                if (rental.daysRented > 3) {
+                    amount += (rental.daysRented - 3) * 1.5;
+                }
+                break;
+        }
+
+        return amount;
+    }
+    ...
+}
+```
+</details>
+
+**COMMIT.**
 
