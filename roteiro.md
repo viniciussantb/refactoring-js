@@ -116,7 +116,7 @@ class Customer {
                 case Movie.REGULAR:
                     thisAmount += 2;
                     if (rental.daysRented > 2) {
-                        thisAmount += (rental.daysRented() - 2) * 1.5;
+                        thisAmount += (rental.daysRented - 2) * 1.5;
                     }
                     break;
                 case Movie.NEW_RELEASE:
@@ -287,6 +287,7 @@ Nesse momento, fica claro que o recém criado método `Customer.amountFor` trata
 
 Inicialmente, mova esse método para `Rental`, mas com o nome `getCharge`; a versão antiga vai ser alterada para apenas delegar a chamada para o método movido. A ideia é que refactorings devem ser feitos em pequenos passos, para garantir que nada está sendo quebrado.
 
+##### Code block 3
 ```js
 class Rental {
     ...
@@ -405,6 +406,99 @@ class Customer {
         //add footer lines
         result += `Amount owed is ${totalAmount}\nYou earned ${frequentRenterPoints} frequent renter points`;
         return result;
+    }
+    ...
+}
+```
+</details>
+
+**COMMIT.**
+
+## Refactoring #3: *Replace Temp With Query*
+O método `Customer.statement` declara a variável local `thisAmount` para executar a regra de negócio. O refactoring *[Replace Temp With Query](https://refactoring.guru/replace-temp-with-query)* substitui uma variável local e temporária (*temp*) por uma chamada de função (*query*). No nosso caso, vamos substituir toda referência a `thisAmount` por uma chamada a `rental.getCharge()`. Veja o código após o refactoring:
+
+#### Code block 4
+```js
+class Customer {
+    ...
+    statement() {
+        let totalAmount = 0;
+        let frequentRenterPoints = 0;
+
+        let result = `Rental Record for ${this.name}\n`;
+
+        for (let rental of this.rentals) {
+            frequentRenterPoints++;
+
+            // add bonus for a two day new release rental
+            if (rental.movie.priceCode === Movie.NEW_RELEASE && rental.daysRented > 1) {
+                frequentRenterPoints++;
+            }
+
+            //show figures for this rental
+            result += `\t${rental.movie.title}\t${rental.getCharge()}\n`;
+            totalAmount += rental.getCharge();
+        }
+
+        //add footer lines
+        result += `Amount owed is ${totalAmount}\nYou earned ${frequentRenterPoints} frequent renter points`;
+        return result;
+    }
+    ...
+}
+```
+Resumindo o que foi feito acima: `thisAmount` sumiu, sendo substituída por uma chamada a `Rental.getCharge`.
+
+A principal motivação para esse refactoring é se livrar de variáveis temporárias, que tendem a dificultar o entendimento do código (pois você tem que lembrar o que elas armazenam). Claro, pode-se alegar que isso causa um problema de performance, porém esse possível problema pode ser resolvido pelo compilador (isto é, pelas estratégias de otimização de código implementadas pela **V8**, a máquina virtual responsável por executar código JavaScript no Chrome e Node.js).
+
+**COMMIT.**
+
+## Refactoring #4: *Extract Method*
+Ainda é possível melhorar a situação de `Customer.statement`, diminuindo seu tamanho e complexidade. Para isso, vamos extrair mais um método que será responsável pela lógica de achar os `frequent renter points` (código relativo ao comentário `add frequent renter points`). Veja como ficará o código de `statement` após refactoring:
+
+#### Code block 5
+```js
+class Customer {
+    statement() {
+        let totalAmount = 0;
+        let frequentRenterPoints = 0;
+
+        let result = `Rental Record for ${this.name}\n`;
+
+        for (let rental of this.rentals) {
+            frequentRenterPoints += rental.getFrequentRenterPoints(); // <-- novo método!
+
+            //show figures for this rental
+            result += `\t${rental.movie.title}\t${rental.getCharge()}\n`;
+            totalAmount += rental.getCharge();
+        }
+
+        //add footer lines
+        result += `Amount owed is ${totalAmount}\nYou earned ${frequentRenterPoints} frequent renter points`;
+        return result;
+    }
+}
+```
+
+#### Exercício: *Extract Method*
+Extraia um método de `Customer.statement` que seja responsável por calcular os `frequent renter points`. `statement` deve chamar esse método como mostrado no [trecho acima](#code-block-5). Em qual classe esse novo método deverá estar localizado, e quais parâmetros deve receber? Não se esqueça de executar o teste após as mudanças.
+
+<details>
+<summary>Código fonte: Extract Method</summary>
+
+O método extraído deve estar na classe `Rental` e não precisa de parâmetros adicionais:
+```js
+class Rental {
+    ...
+    /**
+     * @return {number}
+     */
+    getFrequentRenterPoints() {
+        if (this.movie.priceCode === Movie.NEW_RELEASE && this.daysRented > 1) {
+            return 2;
+        } else {
+            return 1;
+        }
     }
     ...
 }
