@@ -506,3 +506,72 @@ class Rental {
 </details>
 
 **COMMIT.**
+
+## Refactoring #5: Replace Temp With Query
+Mais duas variáveis locais (*temp*) do método `statement` agora podem ser extraídas para funções (*queries*). São elas:
+
+* `totalAmount`: pode ser extraída para um novo método chamado `getTotalCharge`;
+* `frequentRenterPoints`: pode ser extraída também para um novo método chamado `getTotalFrequentRenterPoints`.
+
+Veja como o código deve ficar com essas refatorações:
+
+##### Code block 6
+```js
+class Customer {
+    ...
+    /**
+     * @method statement
+     * @return {string}
+     */
+    statement() {
+        let result = `Rental Record for ${this.name}\n`;
+
+        for (let rental of this.rentals) {
+            //show figures for this rental
+            result += `\t${rental.movie.title}\t${rental.getCharge()}\n`;
+        }
+
+        //add footer lines
+        result += `Amount owed is ${this.getTotalCharge()}\nYou earned ${this.getTotalFrequentRenterPoints()} frequent renter points`;
+        return result;
+    }
+
+    /**
+     * @method getTotalCharge
+     * @return {number}
+     */
+    getTotalCharge() {
+        let result = 0;
+        
+        for (let rental of this.rentals) {
+            result += rental.getCharge();
+        }
+
+        return result;
+    }
+
+    /**
+     * @method getTotalFrequentRenterPoints
+     * @return {number}
+     */
+    getTotalFrequentRenterPoints() {
+        let result = 0;
+        
+        for (let rental of this.rentals) {
+            result += rental.getFrequentRenterPoints();
+        }
+
+        return result;
+    }
+    ...
+}
+```
+
+Você já deve estar pensando muitas coisas sobre essas mudanças, e não faz mal perceber alguns possíveis problemas originados por elas:
+* O código ficou um pouco maior, mas nem foi tanto assim. Lembre-se de que a extração de método torna o código mais modular, e possibilita um futuro reuso da lógica se necessário. Número de linhas de código não são uma métrica absoluta para a qualidade do código.
+* A mudança fez com que o loop no método `statement` seja executado três vezes (uma em `statement`, uma em `getTotalCharge` e mais uma em `getTotalFrequentRenterPoints`). Isso gerará problemas de performance? Teoricamente sim, mas provavelmente na maioria dos casos não haverá uma diferença significativa, pois os clientes da locadora não terão tantos filmes alugados assim.
+
+#### Exercício: *Replace Temp With Query*
+Substitua as variáveis locais `totalAmount` e `frequentRenterPoints` por "queries" (novos métodos).
+
+**COMMIT.**
