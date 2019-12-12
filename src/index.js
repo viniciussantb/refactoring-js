@@ -145,6 +145,28 @@ class Customer {
         result += `Amount owed is ${this.getTotalCharge()}\nYou earned ${this.getTotalFrequentRenterPoints()} frequent renter points`;
         return result;
     }
+    /**
+     * @method htmlStatement
+     * @return {string}
+     */
+    htmlStatement() {
+
+        let result = `<h1>Rental Record for <strong>${this.name}</strong></h1>\n`;
+
+        result += '<ul>';
+
+        for (let rental of this.rentals) {
+            //show figures for this rental
+            result += `<li>${rental.movie.title}: ${rental.getCharge()}</li>`;
+        }
+
+        result += '</ul>';
+
+        //add footer lines
+        result += `<p>Amount owed is <strong>${this.getTotalCharge()}</strong>.<br/>You earned ${this.getTotalFrequentRenterPoints()} frequent renter points</p>`;
+
+        return result;
+    }
 
     /**
      * @method getTotalCharge
@@ -176,7 +198,7 @@ class Customer {
     }
 }
 
-function test() {
+function statementTest() {
     const c = new Customer("Alice");
 
     const m1 = new Movie("Interstellar", Movie.CHILDREN);
@@ -206,8 +228,40 @@ function test() {
 
     if (!testPassed) {
         console.log(`Expected output:\n${expectedOutput}\n\n`);
-        console.log(`Actual output:\n${expectedOutput}\n`);
+        console.log(`Actual output:\n${actualOutput}\n`);
+    }
+
+}
+
+function htmlStatementTest() {
+    const c = new Customer("Alice");
+
+    const m1 = new Movie("Interstellar", Movie.CHILDREN);
+    const m2 = new Movie("2001", Movie.REGULAR);
+    const m3 = new Movie("Ad Astra", Movie.NEW_RELEASE);
+
+    const r1 = new Rental(m1, 3);
+    const r2 = new Rental(m2, 1);
+    const r3 = new Rental(m3, 10);
+
+    c.addRental(r1);
+    c.addRental(r2);
+    c.addRental(r3);
+
+    const actualOutput = c.htmlStatement();
+
+    const expectedOutput = `<h1>Rental Record for <strong>Alice</strong></h1>
+<ul><li>Interstellar: 1.5</li><li>2001: 2</li><li>Ad Astra: 30</li></ul><p>Amount owed is <strong>33.5</strong>.<br/>You earned 4 frequent renter points</p>`;
+
+    const testPassed = expectedOutput === actualOutput;
+
+    console.log(testPassed ? "Ok :)" : "Failed :(");
+
+    if (!testPassed) {
+        console.log(`Expected output:\n${expectedOutput}\n\n`);
+        console.log(`Actual output:\n${actualOutput}\n`);
     }
 }
 
-test();
+statementTest();
+htmlStatementTest();

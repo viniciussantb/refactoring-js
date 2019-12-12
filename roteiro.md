@@ -155,7 +155,7 @@ Tendo todo o conteúdo no arquivo `index.js`, realize um **commit** para salvar 
 
 Será necessário criar o hábito de executar esse teste logo após cada refatorção deste roteiro, preferencialmente antes de fazer um *commit*, para nos certificarmos que as funcionalidades do sistema ainda estão funcionando mesmo com mudanças no código. Caso em algum momento o teste aponte uma falha, a refatoração não foi feita corretamente.
 
-### Exercício: Teste unitário
+#### Exercício: Teste unitário
 Escreva um teste unitário para o método `Customer.statement`.
 
 <details>
@@ -192,7 +192,7 @@ function test() {
 
     if (!testPassed) {
         console.log(`Expected output:\n${expectedOutput}\n\n`);
-        console.log(`Actual output:\n${expectedOutput}\n`);
+        console.log(`Actual output:\n${actualOutput}\n`);
     }
 }
 
@@ -575,3 +575,64 @@ Você já deve estar pensando muitas coisas sobre essas mudanças, e não faz ma
 Substitua as variáveis locais `totalAmount` e `frequentRenterPoints` por "queries" (novos métodos).
 
 **COMMIT.**
+
+### Nova feature: Statement em HTML
+
+Até aqui, realizamos muitas mudanças para refatorar o código relacionado ao `statement`, mas agora é hora de mostrar o quanto as refatorações serão benéficas para a manutenabilidade do código no geral. Você agora será designado para uma nova implementação no sistema de alguel de filmes: a emissão do relatório de cliente no formato HTML. Assim como ocorre no atual método `statement`, as informações de todos os aluguéis de um cliente devem ser coletadas e exibidas de uma forma organizada, porém num formato que possa ser lido e apresentado por browsers (HTML) como no exemplo abaixo:
+
+##### Code block 7
+```html
+<h1>Rental Record for <strong>Alice</strong></h1>
+
+<ul>
+    <li>Interstellar: 1.5</li>
+    <li>2001: 2</li>
+    <li>Ad Astra: 30</li>
+</ul>
+
+<p>
+Amount owed is <strong>33.5</strong>.<br/>
+You earned 4 frequent renter points
+</p>
+```
+
+#### Exercício: Nova feature
+Implemente um novo método, `htmlStatement`, que retorna o relatório de aluguéis de um cliente no formato HTML (similar ao exposto no [trecho acima](#code-block-7)). Também escreva um teste para esse novo método, que deverá ser executado antes de cada commit daqui em diante.
+
+<details>
+<summary>Código-fonte: Nova feature</summary>
+
+```js
+class Customer {
+    ...
+    /**
+     * @method htmlStatement
+     * @return {string}
+     */
+    htmlStatement() {
+        let result = `<h1>Rental Record for <strong>${this.name}</strong></h1>\n`;
+
+        result += '<ul>';
+
+        for (let rental of this.rentals) {
+            //show figures for this rental
+            result += `<li>${rental.movie.title}: ${rental.getCharge()}</li>`;
+        }
+
+        result += '</ul>';
+
+        //add footer lines
+        result += `<p>Amount owed is <strong>${this.getTotalCharge()}</strong>.<br/>You earned ${this.getTotalFrequentRenterPoints()} frequent renter points</p>`;
+
+        return result;
+    }
+    ...
+}
+```
+Aqui, vemos uma vantagem: conseguimos reusar todos os métodos criados anteriormente, incluindo: `getCharge`, `getTotalCharge` e `getTotalFrequentRenterPoints`. Por isso, a criação do novo método foi bem rápida e não causou duplicação de código (ou uma duplicação pequena, assumindo que ainda existe alguma lógica repetida, com o método `statement`).
+</details>
+
+**COMMIT.**
+
+### Refactoring #7: **Replace Conditional with Polymorphism**
+No método `getCharge`, da classe `Rental`, podemos ver que há uma forte dependência de um atributo da classe `Movie`, o que nos dá um indício de que precisamos refatorá-lo. Esse método pode ser movido completamente para `Movie`
