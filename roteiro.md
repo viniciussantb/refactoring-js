@@ -635,4 +635,84 @@ Aqui, vemos uma vantagem: conseguimos reusar todos os métodos criados anteriorm
 **COMMIT.**
 
 ### Refactoring #7: **Replace Conditional with Polymorphism**
-No método `getCharge`, da classe `Rental`, podemos ver que há uma forte dependência de um atributo da classe `Movie`, o que nos dá um indício de que precisamos refatorá-lo. Esse método pode ser movido completamente para `Movie`
+No método `getCharge`, da classe `Rental`, podemos ver que há uma forte dependência de um atributo da classe `Movie` (`priceCode`), o que nos dá um indício de que precisamos refatorá-lo. Esse método pode ser movido completamente para `Movie`, deixando o código mais limpo no geral. Em `Rental.getCharge`, passamos a chamar esse novo método.
+
+```js
+class Movie {
+    ...
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        let amount = 0;
+
+        switch (this.priceCode) {
+            case Movie.REGULAR:
+                amount += 2;
+                if (daysRented > 2) {
+                    amount += (daysRented - 2) * 1.5;
+                }
+                break;
+            case Movie.NEW_RELEASE:
+                amount += daysRented * 3;
+                break;
+            case Movie.CHILDREN:
+                    amount += 1.5;
+                if (daysRented > 3) {
+                    amount += (daysRented - 3) * 1.5;
+                }
+                break;
+        }
+
+        return amount;
+    }
+    ...
+}
+
+class Rental {
+    ...
+
+    /**
+     * @return {number}
+     */
+    getCharge() { // agora chama o novo método de Movie
+        return this.movie.getCharge(this.daysRented);
+    }
+    ...
+}
+```
+
+Partindo do mesmo princípio, também podemos mover `getFrequentRenterPoints` também para a classe `Movie`. Ou seja, é melhor que métodos que usam informações sobre tipos de filme estejam todos na classe `Movie`:
+
+```js
+class Movie {
+    ...
+    /**
+     * @return {number}
+     */
+    getFrequentRenterPoints(daysRented) {
+        if (this.priceCode === Movie.NEW_RELEASE && daysRented > 1) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+    ...
+}
+
+class Rental {
+    ...
+    /**
+     * @return {number}
+     */
+    getFrequentRenterPoints() {
+        return this.movie.getFrequentRenterPoints(this.daysRented);
+    }
+    ...
+}
+```
+Por fim, herança, como no diagrama abaixo (**errata**: existe um erro no diagrama, que está no livro; onde consta `getCharge`, leia-se `getPriceCode`).
+
+(Diagrama de herança)[inheritance_diagram.png]
+

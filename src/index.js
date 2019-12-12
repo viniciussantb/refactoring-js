@@ -41,6 +41,35 @@ class Movie {
     set priceCode(priceCode) {
         this._priceCode = priceCode;
     }
+
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        let amount = 0;
+
+        switch (this.priceCode) {
+            case Movie.REGULAR:
+                amount += 2;
+                if (daysRented > 2) {
+                    amount += (daysRented - 2) * 1.5;
+                }
+                break;
+            case Movie.NEW_RELEASE:
+                amount += daysRented * 3;
+                break;
+            case Movie.CHILDREN:
+                    amount += 1.5;
+                if (daysRented > 3) {
+                    amount += (daysRented - 3) * 1.5;
+                }
+                break;
+        }
+
+        return amount;
+    }
+
 }
 
 class Rental {
