@@ -732,7 +732,7 @@ class Rental {
 ```
 Por fim, herança, como no diagrama abaixo (**errata**: existe um erro no diagrama, que está no livro; onde consta `getCharge`, na verdade se trata de `getPriceCode`).
 
-(Diagrama de herança)[inheritance_diagram.png]
+![Diagrama de herança](inheritance_diagram.png)
 
 Podemos expressar o conceito da seguinte forma: criamos uma classe abstrata, `Price`, que de início exigirá a implementação do método `getPriceCode`. Para representar os três tipos diferentes de preços de filme, criaremos três classes concretas: `RegularPrice`, `NewReleasePrice` e `ChildrenPrice`. Como na versão atual JavaScript no momento do desenvolvimento desse exercício (ES10) ainda não contamos com classes abstratas, podemos simular uma classe abstrata da seguinte forma:
 
