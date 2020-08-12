@@ -1,4 +1,6 @@
 # Roteiro
+### Refatoração em JavaScript
+
 O exercício abaixo destaca uma série de refatorações em um sistema pré-existente de uma locadora de filmes. Inicialmente, esse sistema hipotético possui três classes: `Customer` (cliente), `Movie` (filme) e `Rental` (aluguel). 
 
 ## Versão inicial
