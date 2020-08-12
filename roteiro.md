@@ -1,5 +1,5 @@
 # Roteiro
-O exercício abaixo destaca uma série de refatorações em um sistema pré-existente de uma locadora de filmes. Inicialmente, esse sistema hipotético possui três classes: `Customer` (clientes), `Movie` (filmes) e `Rental` (aluguéis). 
+O exercício abaixo destaca uma série de refatorações em um sistema pré-existente de uma locadora de filmes. Inicialmente, esse sistema hipotético possui três classes: `Customer` (cliente), `Movie` (filme) e `Rental` (aluguel). 
 
 ## Versão inicial
 O código inicial do código do sistema encontra-se abaixo. Leia, analise e trascreva para o arquivo `src/index.js` (não copie e cole, pois o ato de escrever o código melhora o seu entendimento).
@@ -151,7 +151,7 @@ class Customer {
 Tendo todo o conteúdo no arquivo `index.js`, realize um **commit** para salvar o estado inicial.
 
 ### Teste unitário
-É hora de implementear um teste para o método `statement`. Crie alguns objetos do tipo `Movie`, um `Customer` com alguns aluguéis (objetos do tipo `Rental`) e implemente um teste unitário que deve verificar se a string retornada pelo método `statement` é realmente a saída esperada.
+É hora de implementar um teste para o método `statement`. Crie alguns objetos do tipo `Movie`, um `Customer` com alguns aluguéis (objetos do tipo `Rental`) e implemente um teste unitário que deve verificar se a string retornada pelo método `statement` é realmente a saída esperada.
 
 Será necessário criar o hábito de executar esse teste logo após cada refatorção deste roteiro, preferencialmente antes de fazer um *commit*, para nos certificarmos que as funcionalidades do sistema ainda estão funcionando mesmo com mudanças no código. Caso em algum momento o teste aponte uma falha, a refatoração não foi feita corretamente.
 
@@ -160,7 +160,7 @@ Escreva um teste unitário para o método `Customer.statement`.
 
 <details>
 <summary>Código-fonte: Teste unitário</summary>
-  
+
 ```js
 function test() {
     const c = new Customer("Alice");
@@ -203,6 +203,9 @@ test();
 **COMMIT.**
 
 ## Refactoring #1: *Extract Method*
+
+> Leitura recomendada: https://refactoring.guru/extract-method
+
 Podemos ver que o método `Customer.statement` é um dos maiores e mais confusos trechos do código. É uma função que realiza muitas tarefas, faz o uso de muitas variáveis locais e abusa da programação procedural. Para resolver essa bagunça, podemos começar extraindo um método para diminuir o tamanho de `statement` menor. Esse novo método poderá ser chamado de `amountFor`, e será responsável pelo cálculo da quantia dos filmes alugados por um cliente, demarcado pelo comentário `Determine amounts for each line`. Após a extração do método, o código de `statement` será:
 
 ##### Code block 2
@@ -283,6 +286,9 @@ class Customer {
 **COMMIT.**
 
 ## Refactoring #2: *Move Method*
+
+> Leitura recomendada: https://refactoring.guru/move-method
+
 Nesse momento, fica claro que o recém criado método `Customer.amountFor` trata de regras específicas da classe `Rental`. Podemos torná-lo mais coerente movendo-o para a classe `Rental`, já que seu único parâmetro é um objeto `Rental` e usa seus dados para retornar uma nova informação. Esse tipo de refactoring é chamado [`move method`](https://refactoring.guru/move-method), e é utilizado quando desejamos reduzir a interdependência entre classes.
 
 Inicialmente, mova esse método para `Rental`, mas com o nome `getCharge`; a versão antiga vai ser alterada para apenas delegar a chamada para o método movido. A ideia é que refactorings devem ser feitos em pequenos passos, para garantir que nada está sendo quebrado.
@@ -415,6 +421,9 @@ class Customer {
 **COMMIT.**
 
 ## Refactoring #3: *Replace Temp With Query*
+
+> Leitura recomendada: https://refactoring.guru/replace-temp-with-query
+
 O método `Customer.statement` declara a variável local `thisAmount` para executar a regra de negócio. O refactoring *[Replace Temp With Query](https://refactoring.guru/replace-temp-with-query)* substitui uma variável local e temporária (*temp*) por uma chamada de função (*query*). No nosso caso, vamos substituir toda referência a `thisAmount` por uma chamada a `rental.getCharge()`. Veja o código após o refactoring:
 
 #### Code block 4
@@ -454,6 +463,9 @@ A principal motivação para esse refactoring é se livrar de variáveis tempor�
 **COMMIT.**
 
 ## Refactoring #4: *Extract Method*
+
+> Leitura recomendada: https://refactoring.guru/extract-method
+
 Ainda é possível melhorar a situação de `Customer.statement`, diminuindo seu tamanho e complexidade. Para isso, vamos extrair mais um método que será responsável pela lógica de achar os `frequent renter points` (código relativo ao comentário `add frequent renter points`). Veja como ficará o código de `statement` após refactoring:
 
 #### Code block 5
@@ -508,6 +520,9 @@ class Rental {
 **COMMIT.**
 
 ## Refactoring #5: Replace Temp With Query
+
+> Leitura recomendada: https://refactoring.guru/replace-temp-with-query
+
 Mais duas variáveis locais (*temp*) do método `statement` agora podem ser extraídas para funções (*queries*). São elas:
 
 * `totalAmount`: pode ser extraída para um novo método chamado `getTotalCharge`;
@@ -634,7 +649,10 @@ Aqui, vemos uma vantagem: conseguimos reusar todos os métodos criados anteriorm
 
 **COMMIT.**
 
-### Refactoring #7: **Replace Conditional with Polymorphism**
+### Refactoring #6: **Replace Conditional with Polymorphism**
+
+> Leitura recomendada: https://refactoring.guru/replace-conditional-with-polymorphism
+
 No método `getCharge`, da classe `Rental`, podemos ver que há uma forte dependência de um atributo da classe `Movie` (`priceCode`), o que nos dá um indício de que precisamos refatorá-lo. Esse método pode ser movido completamente para `Movie`, deixando o código mais limpo no geral. Em `Rental.getCharge`, passamos a chamar esse novo método.
 
 ```js
@@ -712,7 +730,245 @@ class Rental {
     ...
 }
 ```
-Por fim, herança, como no diagrama abaixo (**errata**: existe um erro no diagrama, que está no livro; onde consta `getCharge`, leia-se `getPriceCode`).
+Por fim, herança, como no diagrama abaixo (**errata**: existe um erro no diagrama, que está no livro; onde consta `getCharge`, na verdade se trata de `getPriceCode`).
 
 (Diagrama de herança)[inheritance_diagram.png]
 
+Podemos expressar o conceito da seguinte forma: criamos uma classe abstrata, `Price`, que de início exigirá a implementação do método `getPriceCode`. Para representar os três tipos diferentes de preços de filme, criaremos três classes concretas: `RegularPrice`, `NewReleasePrice` e `ChildrenPrice`. Como na versão atual JavaScript no momento do desenvolvimento desse exercício (ES10) ainda não contamos com classes abstratas, podemos simular uma classe abstrata da seguinte forma:
+
+```js
+class Price {
+    constructor() {
+        if (this.constructor === Price) {
+            throw new TypeError("Abstract class `Price` can not be instantiated");
+        }
+    }
+
+    getPriceCode() {
+        throw new TypeError("Method `getPriceCode` should be implemented");
+    }
+}
+
+class ChildrenPrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+    getPriceCode() {
+        return Movie.CHILDREN;
+    }
+}
+
+class NewReleasePrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+    getPriceCode() {
+        return Movie.NEW_RELEASE;
+    }
+}
+
+class RegularPrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+    getPriceCode() {
+        return Movie.REGULAR;
+    }
+}
+```
+Agora na classe `Movie`, iremos substituir o atributo `priceCode` por `price`, que será uma instância de `RegularPrice`, `NewReleasePrice` ou `ChildrenPrice` e deverá ser recebida como parâmetro no construtor:
+
+```js
+class Movie {
+    ...
+    /**
+     * @constructor
+     * @param {string} title
+     * @param {Price} price
+     * @return {Movie}
+     */
+    constructor(title, price) {
+        this._title = title;
+        this._price = price;
+    }
+
+    /**
+     * @type {Price}
+     */
+    get price() { return this._price; }
+
+    /**
+     * @param {Price} price
+     */
+    set price(price) {
+        this._price = price;
+    }
+    ...
+}
+```
+
+Também podemos mover o método `getCharge` da classe `Movie` para `Price`:
+
+```js
+class Movie {
+    ...
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        return this.price.getCharge(daysRented);
+    }
+    ...
+}
+
+class Price {
+    ...
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        let amount = 0;
+
+        switch (this.getPriceCode) {
+            case Movie.REGULAR:
+                amount += 2;
+                if (daysRented > 2) {
+                    amount += (daysRented - 2) * 1.5;
+                }
+                break;
+            case Movie.NEW_RELEASE:
+                amount += daysRented * 3;
+                break;
+            case Movie.CHILDREN:
+                    amount += 1.5;
+                if (daysRented > 3) {
+                    amount += (daysRented - 3) * 1.5;
+                }
+                break;
+        }
+
+        return amount;
+    }
+    ...
+}
+```
+
+Caminhando para o final, vamos decompor `getCharge`, criando métodos específicos nas subclasses de `Price` (veja que na classe `Price`, propriamente dita, `getCharge` vai ficar como um método abstrato):
+
+```js
+class ChildrenPrice extends Price {
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        let result = 1.5;
+
+        if (daysRented > 3) {
+            result += (daysRented - 3) * 1.5;
+        }
+
+        return result;
+    }
+}
+
+class NewReleasePrice extends Price {
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        return daysRented * 3;
+    }
+}
+
+class RegularPrice extends Price {
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        let result = 2;
+
+        if (daysRented > 2) {
+            result += (daysRented - 2) * 1.5;
+        }
+
+        return result;
+    }
+}
+
+```
+Bravo! Vamos agora fazer algo muito parecido com o método `getFrequentRenterPoints`. Para isso, mova-o de `Movie` para a classe `Price`: 
+
+```js
+class Movie {
+    ...
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getFrequentRenterPoints(daysRented) {
+        return this.price.getFrequentRenterPoints(daysRented);
+    }
+    ...
+}
+
+class Price {
+    ...
+    getFrequentRenterPoints(daysRented) {
+        if (this.getPriceCode() === Movie.NEW_RELEASE && daysRented > 1) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+    ...
+}
+```
+
+Dessa forma, fica mais fácil visualizar como podemos decompor `getFrequentRenterPoints`: esse método ficará na classe abstrata `Price` com uma versão genérica e concreta, e outra em na subclasse `NewReleasePrice` para tratar de um caso especĩfico.
+
+```js
+class Price {
+    ...
+    getFrequentRenterPoints() {
+        return 1;
+    }
+    ...
+}
+
+class NewReleasePrice extends Price {
+    ...
+    getFrequentRenterPoints(daysRented) {
+        return (daysRented > 1) ? 2 : 1;
+    }
+    ...
+}
+```
+
+É isso! Execute os testes e verifique se tudo está funcionando corretamente.
+
+### Reflexões finais
+Para terminar mesmo, leia e reflita com calma sobre os comentários finais do Martin Fowler, nos quais ele argumenta sobre as vantagens do último refactoring:
+
+> Putting in the state pattern was quite an effort. Was it worth it? The gain is that if I change any of price’s behavior, add new prices, or add extra price-dependent behavior, the change will be much easier to make. The rest of the application does not know about the use of the state pattern. For the tiny amount of behavior I currently have, it is not a big deal. In a more complex system with a dozen or so price-dependent methods, this would make a big difference. All these changes were small steps. It seems slow to write it this way, but not once did I have to open the debugger, so the process actually flowed quite quickly. It took me much longer to write this section of the book than it did to change the code.
+
+> I’ve now completed the second major refactoring. It is going to be much easier to change the classification structure of movies, and to alter the rules for charging and the frequent renter point system
+
+E também a seção que finaliza o capítulo (Final Thoughts):
+
+> This is a simple example, yet I hope it gives you the feeling of what refactoring is like. I’ve used several refactorings, including Extract Method (110), Move Method (142), and Replace Conditional with Polymorphism (255). All these lead to better-distributed responsibilities and code that is easier to maintain. It does look rather different from procedural style code, and that takes some getting used to. But once you are used to it, it is hard to go back to procedural programs.
+
+> The most important lesson from this example is the rhythm of refactoring: test, small change, test, small change, test, small change. It is that rhythm that allows refactoring to move quickly and safely.

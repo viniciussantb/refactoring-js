@@ -17,12 +17,12 @@ class Movie {
     /**
      * @constructor
      * @param {string} title
-     * @param {number} priceCode
+     * @param {Price} price
      * @return {Movie}
      */
-    constructor(title, priceCode) {
+    constructor(title, price) {
         this._title = title;
-        this._priceCode = priceCode;
+        this._price = price;
     }
 
     /**
@@ -31,15 +31,15 @@ class Movie {
     get title() { return this._title; }
 
     /**
-     * @type {number}
+     * @type {Price}
      */
-    get priceCode() { return this._priceCode; }
+    get price() { return this._price; }
 
     /**
-     * @param {number} priceCode
+     * @param {Price} price
      */
-    set priceCode(priceCode) {
-        this._priceCode = priceCode;
+    set price(price) {
+        this._price = price;
     }
 
     /**
@@ -47,29 +47,16 @@ class Movie {
      * @return {number}
      */
     getCharge(daysRented) {
-        let amount = 0;
-
-        switch (this.priceCode) {
-            case Movie.REGULAR:
-                amount += 2;
-                if (daysRented > 2) {
-                    amount += (daysRented - 2) * 1.5;
-                }
-                break;
-            case Movie.NEW_RELEASE:
-                amount += daysRented * 3;
-                break;
-            case Movie.CHILDREN:
-                    amount += 1.5;
-                if (daysRented > 3) {
-                    amount += (daysRented - 3) * 1.5;
-                }
-                break;
-        }
-
-        return amount;
+        return this.price.getCharge(daysRented);
     }
 
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getFrequentRenterPoints(daysRented) {
+        return this.price.getFrequentRenterPoints(daysRented);
+    }
 }
 
 class Rental {
@@ -95,39 +82,121 @@ class Rental {
     /**
      * @return {number}
      */
-    getCharge() { // note que não precisa mais de parâmetro!
-        let amount = 0;
-
-        switch (this.movie.priceCode) {
-            case Movie.REGULAR:
-                amount += 2;
-                if (this.daysRented > 2) {
-                    amount += (this.daysRented - 2) * 1.5;
-                }
-                break;
-            case Movie.NEW_RELEASE:
-                amount += this.daysRented * 3;
-                break;
-            case Movie.CHILDREN:
-                    amount += 1.5;
-                if (this.daysRented > 3) {
-                    amount += (this.daysRented - 3) * 1.5;
-                }
-                break;
-        }
-
-        return amount;
+    getCharge() {
+        return this.movie.getCharge(this.daysRented);
     }
 
     /**
      * @return {number}
      */
     getFrequentRenterPoints() {
-        if (this.movie.priceCode === Movie.NEW_RELEASE && this.daysRented > 1) {
-            return 2;
-        } else {
-            return 1;
+        return this.movie.getFrequentRenterPoints(this.daysRented);
+    }
+}
+
+/**
+ * @abstract
+ */
+class Price {
+    constructor() {
+        if (this.constructor === Price) {
+            throw new TypeError("Abstract class `Price` cannot be instantiated");
         }
+    }
+
+    getPriceCode() {
+        throw new TypeError("Method `getPriceCode` should be implemented");
+    }
+
+    getCharge() {
+        throw new TypeError("Method `getCharge` should be implemented");
+    }
+
+    /**
+     * @return {number}
+     */
+    getFrequentRenterPoints(daysRented) {
+        return 1;
+    }
+}
+
+class ChildrenPrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+    getPriceCode() {
+        return Movie.CHILDREN;
+    }
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        let result = 1.5;
+
+        if (daysRented > 3) {
+            result += (daysRented - 3) * 1.5;
+        }
+
+        return result;
+    }
+}
+
+class NewReleasePrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+    getPriceCode() {
+        return Movie.NEW_RELEASE;
+    }
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        return daysRented * 3;
+    }
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     */
+    getFrequentRenterPoints(daysRented) {
+        return (daysRented > 1) ? 2 : 1;
+    }
+}
+
+class RegularPrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+    getPriceCode() {
+        return Movie.REGULAR;
+    }
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getCharge(daysRented) {
+        let result = 2;
+
+        if (daysRented > 2) {
+            result += (daysRented - 2) * 1.5;
+        }
+
+        return result;
     }
 }
 
@@ -179,7 +248,6 @@ class Customer {
      * @return {string}
      */
     htmlStatement() {
-
         let result = `<h1>Rental Record for <strong>${this.name}</strong></h1>\n`;
 
         result += '<ul>';
@@ -230,9 +298,9 @@ class Customer {
 function statementTest() {
     const c = new Customer("Alice");
 
-    const m1 = new Movie("Interstellar", Movie.CHILDREN);
-    const m2 = new Movie("2001", Movie.REGULAR);
-    const m3 = new Movie("Ad Astra", Movie.NEW_RELEASE);
+    const m1 = new Movie("Interstellar", new ChildrenPrice());
+    const m2 = new Movie("2001", new RegularPrice());
+    const m3 = new Movie("Ad Astra", new NewReleasePrice());
 
     const r1 = new Rental(m1, 3);
     const r2 = new Rental(m2, 1);
@@ -259,15 +327,14 @@ function statementTest() {
         console.log(`Expected output:\n${expectedOutput}\n\n`);
         console.log(`Actual output:\n${actualOutput}\n`);
     }
-
 }
 
 function htmlStatementTest() {
     const c = new Customer("Alice");
 
-    const m1 = new Movie("Interstellar", Movie.CHILDREN);
-    const m2 = new Movie("2001", Movie.REGULAR);
-    const m3 = new Movie("Ad Astra", Movie.NEW_RELEASE);
+    const m1 = new Movie("Interstellar", new ChildrenPrice());
+    const m2 = new Movie("2001", new RegularPrice());
+    const m3 = new Movie("Ad Astra", new NewReleasePrice());
 
     const r1 = new Rental(m1, 3);
     const r2 = new Rental(m2, 1);
