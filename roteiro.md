@@ -4,7 +4,7 @@
 O exercício abaixo destaca uma série de refatorações em um sistema pré-existente de uma locadora de filmes. Inicialmente, esse sistema hipotético possui três classes: `Customer` (cliente), `Movie` (filme) e `Rental` (aluguel). 
 
 ## Versão inicial
-O código inicial do código do sistema encontra-se abaixo. Leia, analise e trascreva para o arquivo `src/index.js` (não copie e cole, pois o ato de escrever o código melhora o seu entendimento).
+O código inicial do código do sistema encontra-se a seguir. Leia, analise e transcreva para o arquivo `src/index.js` (não copie e cole, pois o ato de escrever o código melhora o seu entendimento).
 ##### Code block 1
 ```js
 class Movie {
@@ -155,7 +155,7 @@ Tendo todo o conteúdo no arquivo `index.js`, realize um **commit** para salvar 
 ### Teste unitário
 É hora de implementar um teste para o método `statement`. Crie alguns objetos do tipo `Movie`, um `Customer` com alguns aluguéis (objetos do tipo `Rental`) e implemente um teste unitário que deve verificar se a string retornada pelo método `statement` é realmente a saída esperada.
 
-Será necessário criar o hábito de executar esse teste logo após cada refatorção deste roteiro, preferencialmente antes de fazer um *commit*, para nos certificarmos que as funcionalidades do sistema ainda estão funcionando mesmo com mudanças no código. Caso em algum momento o teste aponte uma falha, a refatoração não foi feita corretamente.
+Será necessário criar o hábito de executar esse teste logo após cada refatoração deste roteiro, preferencialmente antes de fazer um **commit**, para nos certificarmos que as funcionalidades do sistema ainda estão funcionando mesmo com mudanças no código. Caso em algum momento o teste aponte uma falha, a refatoração não foi feita corretamente.
 
 #### Exercício: Teste unitário
 Escreva um teste unitário para o método `Customer.statement`.
@@ -208,7 +208,7 @@ test();
 
 > Leitura recomendada: https://refactoring.guru/extract-method
 
-Podemos ver que o método `Customer.statement` é um dos maiores e mais confusos trechos do código. É uma função que realiza muitas tarefas, faz o uso de muitas variáveis locais e abusa da programação procedural. Para resolver essa bagunça, podemos começar extraindo um método para diminuir o tamanho de `statement` menor. Esse novo método poderá ser chamado de `amountFor`, e será responsável pelo cálculo da quantia dos filmes alugados por um cliente, demarcado pelo comentário `Determine amounts for each line`. Após a extração do método, o código de `statement` será:
+Podemos ver que o método `Customer.statement` é um dos maiores e mais confusos trechos do código. É uma função que realiza muitas tarefas, faz o uso de muitas variáveis locais e abusa da programação procedural. Para resolver essa bagunça, podemos começar extraindo um método para diminuir o tamanho (em linhs de código) de `statement`. Esse novo método poderá ser chamado de `amountFor`, e será responsável pelo cálculo da quantia dos filmes alugados por um cliente, demarcado pelo comentário `Determine amounts for each line`. Após a extração do método, o código de `statement` será:
 
 ##### Code block 2
 ```js
@@ -244,7 +244,7 @@ statement() {
 ```
 
 #### Exercício: *Extract Method*
-Extraia o código demarcado pelo comentário `Determine amounts for each line` para um novo método, para que `statement` fique menor e mais legível ([code block 2](#code-block-2)). Não se esqueça de executar o teste após o refactoring!
+Extraia o código demarcado pelo comentário `Determine amounts for each line` para um novo método, para que `statement` fique menor e mais legível ([code block 2](#code-block-2)). Não se esqueça de executar o teste após a refatoração!
 
 <details>
 <summary>Código-fonte: Extract Method</summary>
@@ -291,9 +291,9 @@ class Customer {
 
 > Leitura recomendada: https://refactoring.guru/move-method
 
-Nesse momento, fica claro que o recém criado método `Customer.amountFor` trata de regras específicas da classe `Rental`. Podemos torná-lo mais coerente movendo-o para a classe `Rental`, já que seu único parâmetro é um objeto `Rental` e usa seus dados para retornar uma nova informação. Esse tipo de refactoring é chamado [`move method`](https://refactoring.guru/move-method), e é utilizado quando desejamos reduzir a interdependência entre classes.
+Nesse momento, fica claro que o recém criado método `Customer.amountFor` trata de regras específicas da classe `Rental`. Podemos torná-lo mais coerente movendo-o para a classe `Rental`, já que seu único parâmetro é um objeto `Rental` e usa seus dados para retornar uma nova informação. Esse tipo de refatoração é chamada [`move method`](https://refactoring.guru/move-method), e é utilizada quando desejamos reduzir a interdependência entre classes.
 
-Inicialmente, mova esse método para `Rental`, mas com o nome `getCharge`; a versão antiga vai ser alterada para apenas delegar a chamada para o método movido. A ideia é que refactorings devem ser feitos em pequenos passos, para garantir que nada está sendo quebrado.
+Inicialmente, mova esse método para `Rental`, mas com o nome `getCharge`; a versão antiga vai ser alterada para apenas delegar a chamada para o método movido. A ideia é que refatorações devem ser feitas em pequenos passos, para garantir que nada está sendo quebrado.
 
 ##### Code block 3
 ```js
@@ -347,7 +347,7 @@ let thisAmount = rental.getCharge();
 ```
 
 #### Exercício: *Move Method*
-Mova `Customer.amountFor` para a classe `Rental` com as devidas modificações. Não se esqueça de executar o teste após o refactoring!
+Mova `Customer.amountFor` para a classe `Rental` com as devidas modificações. Não se esqueça de executar o teste após a refatoração!
 
 <details>
 <summary>Código-fonte: Move Method</summary>
@@ -426,7 +426,7 @@ class Customer {
 
 > Leitura recomendada: https://refactoring.guru/replace-temp-with-query
 
-O método `Customer.statement` declara a variável local `thisAmount` para executar a regra de negócio. O refactoring *[Replace Temp With Query](https://refactoring.guru/replace-temp-with-query)* substitui uma variável local e temporária (*temp*) por uma chamada de função (*query*). No nosso caso, vamos substituir toda referência a `thisAmount` por uma chamada a `rental.getCharge()`. Veja o código após o refactoring:
+O método `Customer.statement` declara a variável local `thisAmount` para executar a regra de negócio. A refatoração *[Replace Temp With Query](https://refactoring.guru/replace-temp-with-query)* substitui uma variável local e temporária (*temp*) por uma chamada de função (*query*). No nosso caso, vamos substituir toda referência a `thisAmount` por uma chamada a `rental.getCharge()`. Veja o código após a refatoração:
 
 #### Code block 4
 ```js
@@ -460,7 +460,7 @@ class Customer {
 ```
 Resumindo o que foi feito acima: `thisAmount` sumiu, sendo substituída por uma chamada a `Rental.getCharge`.
 
-A principal motivação para esse refactoring é se livrar de variáveis temporárias, que tendem a dificultar o entendimento do código (pois você tem que lembrar o que elas armazenam). Claro, pode-se alegar que isso causa um problema de performance, porém esse possível problema pode ser resolvido pelo compilador (isto é, pelas estratégias de otimização de código implementadas pela **V8**, a máquina virtual responsável por executar código JavaScript no Chrome e Node.js).
+A principal motivação para essa refatoração é se livrar de variáveis temporárias, que tendem a dificultar o entendimento do código (pois você tem que lembrar o que elas armazenam). Claro, pode-se alegar que isso causa um problema de desempenho, porém esse possível problema pode ser resolvido pelo compilador (isto é, pelas estratégias de otimização de código implementadas pela **V8**, a máquina virtual responsável por executar código JavaScript no Chrome e Node.js).
 
 **COMMIT.**
 
@@ -468,7 +468,7 @@ A principal motivação para esse refactoring é se livrar de variáveis tempor�
 
 > Leitura recomendada: https://refactoring.guru/extract-method
 
-Ainda é possível melhorar a situação de `Customer.statement`, diminuindo seu tamanho e complexidade. Para isso, vamos extrair mais um método que será responsável pela lógica de achar os `frequent renter points` (código relativo ao comentário `add frequent renter points`). Veja como ficará o código de `statement` após refactoring:
+Ainda é possível melhorar a situação de `Customer.statement`, diminuindo seu tamanho e complexidade. Para isso, vamos extrair mais um método que será responsável pela lógica de achar os `frequent renter points` (código relativo ao comentário `add frequent renter points`). Veja como ficará o código de `statement` após a refatoração:
 
 #### Code block 5
 ```js
@@ -586,7 +586,7 @@ class Customer {
 
 Você já deve estar pensando muitas coisas sobre essas mudanças, e não faz mal perceber alguns possíveis problemas originados por elas:
 * O código ficou um pouco maior, mas nem foi tanto assim. Lembre-se de que a extração de método torna o código mais modular, e possibilita um futuro reuso da lógica se necessário. Número de linhas de código não são uma métrica absoluta para a qualidade do código.
-* A mudança fez com que o loop no método `statement` seja executado três vezes (uma em `statement`, uma em `getTotalCharge` e mais uma em `getTotalFrequentRenterPoints`). Isso gerará problemas de performance? Teoricamente sim, mas provavelmente na maioria dos casos não haverá uma diferença significativa, pois os clientes da locadora não terão tantos filmes alugados assim.
+* A mudança fez com que o loop no método `statement` seja executado três vezes (uma em `statement`, uma em `getTotalCharge` e mais uma em `getTotalFrequentRenterPoints`). Isso gerará problemas de desempenho? Teoricamente sim, mas provavelmente na maioria dos casos não haverá uma diferença significativa, pois os clientes da locadora não terão tantos filmes alugados assim.
 
 #### Exercício: *Replace Temp With Query*
 Substitua as variáveis locais `totalAmount` e `frequentRenterPoints` por "queries" (novos métodos).
@@ -614,7 +614,7 @@ You earned 4 frequent renter points
 ```
 
 #### Exercício: Nova feature
-Implemente um novo método, `htmlStatement`, que retorna o relatório de aluguéis de um cliente no formato HTML (similar ao exposto no [trecho acima](#code-block-7)). Também escreva um teste para esse novo método, que deverá ser executado antes de cada commit daqui em diante.
+Implemente um novo método, `htmlStatement`, que retorna o relatório de aluguéis de um cliente no formato HTML (similar ao exposto no [trecho acima](#code-block-7)). Também escreva um teste para esse novo método, que deverá ser executado antes de cada **commit** daqui em diante.
 
 <details>
 <summary>Código-fonte: Nova feature</summary>
@@ -963,7 +963,7 @@ class NewReleasePrice extends Price {
 É isso! Execute os testes e verifique se tudo está funcionando corretamente.
 
 ### Reflexões finais
-Para terminar mesmo, leia e reflita com calma sobre os comentários finais do Martin Fowler, nos quais ele argumenta sobre as vantagens do último refactoring:
+Para terminar mesmo, leia e reflita com calma sobre os comentários finais do Martin Fowler, nos quais ele argumenta sobre as vantagens da última refatoração:
 
 > Putting in the state pattern was quite an effort. Was it worth it? The gain is that if I change any of price’s behavior, add new prices, or add extra price-dependent behavior, the change will be much easier to make. The rest of the application does not know about the use of the state pattern. For the tiny amount of behavior I currently have, it is not a big deal. In a more complex system with a dozen or so price-dependent methods, this would make a big difference. All these changes were small steps. It seems slow to write it this way, but not once did I have to open the debugger, so the process actually flowed quite quickly. It took me much longer to write this section of the book than it did to change the code.
 
