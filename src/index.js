@@ -62,6 +62,34 @@ class Rental {
      * @type {number}
      */
     get daysRented() { return this._daysRented; }
+
+    /**
+     * @return {number}
+     */
+
+    getCharge(){
+        let thisAmount = 0;
+
+            // Determine amounts for each line
+            switch (this._movie.priceCode) {
+                case Movie.REGULAR:
+                    thisAmount += 2;
+                    if (this._daysRented > 2) {
+                        thisAmount += (this._daysRented - 2) * 1.5;
+                    }
+                    break;
+                case Movie.NEW_RELEASE:
+                    thisAmount += this._daysRented * 3;
+                    break;
+                case Movie.CHILDREN:
+                    thisAmount += 1.5;
+                    if (this._daysRented > 3) {
+                        thisAmount += (this._daysRented - 3) * 1.5;
+                    }
+                    break;
+            }
+        return thisAmount;
+    }
 }
 
 class Customer {
@@ -92,36 +120,6 @@ class Customer {
     }
 
     /**
-     * @param {Rental} rental
-     * @returns {number}
-     */
-
-    amountFor(rental){
-        let thisAmount = 0;
-
-            // Determine amounts for each line
-            switch (rental.movie.priceCode) {
-                case Movie.REGULAR:
-                    thisAmount += 2;
-                    if (rental.daysRented > 2) {
-                        thisAmount += (rental.daysRented - 2) * 1.5;
-                    }
-                    break;
-                case Movie.NEW_RELEASE:
-                    thisAmount += rental.daysRented * 3;
-                    break;
-                case Movie.CHILDREN:
-                    thisAmount += 1.5;
-                    if (rental.daysRented > 3) {
-                        thisAmount += (rental.daysRented - 3) * 1.5;
-                    }
-                    break;
-            }
-        return thisAmount;
-        
-    }
-
-    /**
      * @method statement
      * @return {string}
      */
@@ -134,7 +132,7 @@ class Customer {
         for (let rental of this.rentals) {
 
             // Determine amounts for each line
-            let thisAmount = this.amountFor(rental);
+            let thisAmount = rental.getCharge();
 
             frequentRenterPoints++;
 
