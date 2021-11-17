@@ -1,3 +1,140 @@
+class Price {
+    constructor(){
+        if(this.constructor === Price){
+            throw new TypeError("Abstract class `Price` can not be instantiated");
+        }
+    }
+
+    getPriceCode() {
+        throw new TypeError("Method `getPriceCode` should be implemented");
+    }
+
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+
+    getCharge(daysRented){
+        let thisAmount = 0;
+
+        // Determine amount
+        switch (this.getPriceCode) {
+            case Movie.REGULAR:
+                thisAmount += 2;
+                if (daysRented > 2) {
+                    thisAmount += (daysRented - 2) * 1.5;
+                }
+                break;
+            case Movie.NEW_RELEASE:
+                thisAmount += daysRented * 3;
+                break;
+            case Movie.CHILDREN:
+                thisAmount += 1.5;
+                if (daysRented > 3) {
+                    thisAmount += (daysRented - 3) * 1.5;
+                }
+                break;
+        }
+        return thisAmount;
+    }
+
+    /**
+     * @return {number}
+     */
+
+    getFrequentRenterPoints() {
+        return 1;
+    }
+}
+
+class ChildrenPrice extends Price {
+    constructor() {super();} 
+
+    /**
+     * @return {number}
+     */
+
+    getPriceCode() {
+        return Movie.CHILDREN;
+    }
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+
+    getCharge(daysRented){
+        let result = 1.5;
+
+        if(daysRented > 3){
+            result += (daysRented - 3) * 1.5;
+        }
+
+        return result;
+    }
+}
+
+class NewReleasePrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+
+    getPriceCode() {
+        return Movie.NEW_RELEASE;
+    }
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+
+     getCharge(daysRented) {
+        return daysRented * 3;
+    }
+
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+    getFrequentRenterPoints(daysRented) {
+        return (daysRented > 1) ? 2 : 1;
+    }
+}
+
+class RegularPrice extends Price {
+    constructor() { super(); }
+
+    /**
+     * @return {number}
+     */
+    getPriceCode() {
+        return Movie.REGULAR;
+    }
+
+    /**
+     * @inherit
+     * @param {number} daysRented
+     * @return {number}
+     */
+
+    getCharge(daysRented) {
+        let result = 2;
+
+        if (daysRented > 2) {
+            result += (daysRented - 2) * 1.5;
+        }
+
+        return result;
+    }
+}
+
+
 class Movie {
     /**
      * @type {number}
@@ -17,12 +154,12 @@ class Movie {
     /**
      * @constructor
      * @param {string} title
-     * @param {number} priceCode
+     * @param {Price} price
      * @return {Movie}
      */
-    constructor(title, priceCode) {
+    constructor(title, price) {
         this._title = title;
-        this._priceCode = priceCode;
+        this._price = price;
     }
 
     /**
@@ -31,15 +168,15 @@ class Movie {
     get title() { return this._title; }
 
     /**
-     * @type {number}
+     * @type {Price}
      */
-    get priceCode() { return this._priceCode; }
+    get price() { return this._price; }
 
     /**
-     * @param {number} priceCode
+     * @param {Price} price
      */
-    set priceCode(priceCode) {
-        this._priceCode = priceCode;
+    set price(price) {
+        this._price = price;
     }
 
     /**
@@ -47,28 +184,8 @@ class Movie {
      * @return {number}
      */
 
-     getCharge(daysRented){
-        let thisAmount = 0;
-
-            // Determine amounts for each line
-            switch (this._priceCode) {
-                case Movie.REGULAR:
-                    thisAmount += 2;
-                    if (daysRented > 2) {
-                        thisAmount += (daysRented - 2) * 1.5;
-                    }
-                    break;
-                case Movie.NEW_RELEASE:
-                    thisAmount += daysRented * 3;
-                    break;
-                case Movie.CHILDREN:
-                    thisAmount += 1.5;
-                    if (daysRented > 3) {
-                        thisAmount += (daysRented - 3) * 1.5;
-                    }
-                    break;
-            }
-        return thisAmount;
+    getCharge(daysRented){
+        return this._price.getCharge(daysRented);
     }
 
     /**
@@ -77,11 +194,7 @@ class Movie {
      */
 
     getFrequentRenterPoints(daysRented) {
-        if (this.priceCode === Movie.NEW_RELEASE && daysRented > 1) {
-            return 2;
-        }else {
-            return 1;
-        }
+        return this._price.getFrequentRenterPoints(daysRented);
     }
 }
 
@@ -223,9 +336,9 @@ class Customer {
 function test() {
     const custumer = new Customer("João");
 
-    const movie1 = new Movie("Pulp Fiction", Movie.CHILDREN);
-    const movie2 = new Movie("Once upon a time in hollywood", Movie.NEW_RELEASE);
-    const movie3 = new Movie("Django Unchained", Movie.REGULAR);
+    const movie1 = new Movie("Pulp Fiction", new ChildrenPrice);
+    const movie2 = new Movie("Once upon a time in hollywood", new NewReleasePrice);
+    const movie3 = new Movie("Django Unchained", new RegularPrice);
 
     const rental1 = new Rental(movie1, 3);
     const rental2 = new Rental(movie2, 10);
