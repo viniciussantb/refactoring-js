@@ -90,6 +90,23 @@ class Rental {
             }
         return thisAmount;
     }
+
+    /**
+     * @return {number}
+     */
+
+    getFrequentRenterPoints(){
+        let frequentRenterPoints = 0;
+
+        frequentRenterPoints++;
+
+        // add bonus for a two day new release rental
+        if (this._movie.priceCode === Movie.NEW_RELEASE && this._daysRented > 1) {
+            frequentRenterPoints++;
+        }
+        
+        return frequentRenterPoints;
+    }
 }
 
 class Customer {
@@ -130,15 +147,8 @@ class Customer {
         let result = `Rental Record for ${this.name}\n`;
 
         for (let rental of this.rentals) {
-
-            // Determine amounts for each line
-
-            frequentRenterPoints++;
-
-            // add bonus for a two day new release rental
-            if (rental.movie.priceCode === Movie.NEW_RELEASE && rental.daysRented > 1) {
-                frequentRenterPoints++;
-            }
+            
+            frequentRenterPoints += rental.getFrequentRenterPoints();
 
             //show figures for this rental
             result += `\t${rental.movie.title}\t${rental.getCharge()}\n`;
