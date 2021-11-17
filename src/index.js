@@ -140,3 +140,40 @@ class Customer {
         return result;
     }
 }
+
+
+function test() {
+    const custumer = new Customer("João");
+
+    const movie1 = new Movie("Pulp Fiction", Movie.CHILDREN);
+    const movie2 = new Movie("Once upon a time in hollywood", Movie.NEW_RELEASE);
+    const movie3 = new Movie("Django Unchained", Movie.REGULAR);
+
+    const rental1 = new Rental(movie1, 3);
+    const rental2 = new Rental(movie2, 10);
+    const rental3 = new Rental(movie3, 1);
+
+    custumer.addRental(rental1);
+    custumer.addRental(rental2);
+    custumer.addRental(rental3);
+
+    const output = custumer.statement();
+
+    const expectedOutput = 
+        `Rental Record for João\n` +
+            `\tPulp Fiction\t1.5\n` +
+            `\tOnce upon a time in hollywood\t30\n` +
+            `\tDjango Unchained\t2\n` +
+        `Amount owed is 33.5\nYou earned 4 frequent renter points`;
+
+    const testPassed = expectedOutput === output;
+
+    console.log(testPassed ? 'Test Passed! ' : 'Test Failed...');
+
+    if(!testPassed){
+        console.log(`Expected output:\n${expectedOutput}\n\n`);
+        console.log(`Actual output:\n${output}\n`);
+    }
+}
+
+test()
