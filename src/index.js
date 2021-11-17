@@ -41,6 +41,48 @@ class Movie {
     set priceCode(priceCode) {
         this._priceCode = priceCode;
     }
+
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+
+     getCharge(daysRented){
+        let thisAmount = 0;
+
+            // Determine amounts for each line
+            switch (this._priceCode) {
+                case Movie.REGULAR:
+                    thisAmount += 2;
+                    if (daysRented > 2) {
+                        thisAmount += (daysRented - 2) * 1.5;
+                    }
+                    break;
+                case Movie.NEW_RELEASE:
+                    thisAmount += daysRented * 3;
+                    break;
+                case Movie.CHILDREN:
+                    thisAmount += 1.5;
+                    if (daysRented > 3) {
+                        thisAmount += (daysRented - 3) * 1.5;
+                    }
+                    break;
+            }
+        return thisAmount;
+    }
+
+    /**
+     * @param {number} daysRented
+     * @return {number}
+     */
+
+    getFrequentRenterPoints(daysRented) {
+        if (this.priceCode === Movie.NEW_RELEASE && daysRented > 1) {
+            return 2;
+        }else {
+            return 1;
+        }
+    }
 }
 
 class Rental {
@@ -68,27 +110,7 @@ class Rental {
      */
 
     getCharge(){
-        let thisAmount = 0;
-
-            // Determine amounts for each line
-            switch (this._movie.priceCode) {
-                case Movie.REGULAR:
-                    thisAmount += 2;
-                    if (this._daysRented > 2) {
-                        thisAmount += (this._daysRented - 2) * 1.5;
-                    }
-                    break;
-                case Movie.NEW_RELEASE:
-                    thisAmount += this._daysRented * 3;
-                    break;
-                case Movie.CHILDREN:
-                    thisAmount += 1.5;
-                    if (this._daysRented > 3) {
-                        thisAmount += (this._daysRented - 3) * 1.5;
-                    }
-                    break;
-            }
-        return thisAmount;
+        return this._movie.getCharge(this._daysRented);
     }
 
     /**
@@ -96,16 +118,7 @@ class Rental {
      */
 
     getFrequentRenterPoints(){
-        let frequentRenterPoints = 0;
-
-        frequentRenterPoints++;
-
-        // add bonus for a two day new release rental
-        if (this._movie.priceCode === Movie.NEW_RELEASE && this._daysRented > 1) {
-            frequentRenterPoints++;
-        }
-        
-        return frequentRenterPoints;
+        return this._movie.getFrequentRenterPoints(this._daysRented);
     }
 }
 
