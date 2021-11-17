@@ -92,17 +92,12 @@ class Customer {
     }
 
     /**
-     * @method statement
-     * @return {string}
+     * @param {Rental} rental
+     * @returns {number}
      */
-    statement() {
-        let totalAmount = 0;
-        let frequentRenterPoints = 0;
 
-        let result = `Rental Record for ${this.name}\n`;
-
-        for (let rental of this.rentals) {
-            let thisAmount = 0;
+    amountFor(rental){
+        let thisAmount = 0;
 
             // Determine amounts for each line
             switch (rental.movie.priceCode) {
@@ -122,6 +117,24 @@ class Customer {
                     }
                     break;
             }
+        return thisAmount;
+        
+    }
+
+    /**
+     * @method statement
+     * @return {string}
+     */
+    statement() {
+        let totalAmount = 0;
+        let frequentRenterPoints = 0;
+
+        let result = `Rental Record for ${this.name}\n`;
+
+        for (let rental of this.rentals) {
+
+            // Determine amounts for each line
+            let thisAmount = this.amountFor(rental);
 
             frequentRenterPoints++;
 
