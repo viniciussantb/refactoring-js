@@ -150,7 +150,7 @@ class Customer {
         }
 
         //add footer lines
-        result += `Amount owed is ${this.getTotalCharge()}\nYou earned ${this.getFrequentRenterPoints()} frequent renter points`;
+        result += `Amount owed is ${this.getTotalCharge()}\nYou earned ${this.getTotalFrequentRenterPoints()} frequent renter points`;
         return result;
     }
 
@@ -174,12 +174,33 @@ class Customer {
      * @return {number}
      */
 
-    getFrequentRenterPoints() {
+    getTotalFrequentRenterPoints() {
         let result = 0;
 
         for(let rental of this.rentals){
             result += rental.getFrequentRenterPoints();
         }
+
+        return result;
+    }
+
+    /**
+     * @method htmlStatement
+     * @return {string}
+     */
+
+    htmlStatement(){
+        let result = `<h1>Rental Record for <strong>${this._name}</strong></h1>\n`;
+
+        result += `<ul>`
+
+        for(let rental of this._rentals){
+            result += `<li>${rental.movie.title}: ${rental.getCharge()}</li>`
+        }
+
+        result += `</ul>`
+
+        result += `<p>Amount owed is <strong>${this.getTotalCharge()}</strong>.<br/>You earned ${this.getTotalFrequentRenterPoints()} frequent renter points</p>`;
 
         return result;
     }
